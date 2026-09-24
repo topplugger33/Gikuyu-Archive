@@ -46,6 +46,7 @@ const ArticleSchema = new mongoose.Schema({
     excerpt: { type: String, required: true },
     content: { type: String, required: true },
     author: { type: String, default: "Gĩkũyũ Archive" },
+    baseLikes: { type: Number, default: 0 },
     date: { type: Date, default: Date.now }
 });
 
@@ -69,25 +70,20 @@ const Article = mongoose.model("Article", ArticleSchema);
 const Like = mongoose.model("Like", LikeSchema);
 const Comment = mongoose.model("Comment", CommentSchema);
 
-// ================= SEED ARTICLES =================
+// ================= SEED =================
 async function seedArticles() {
     const count = await Article.countDocuments();
-    if (count > 0) {
-        console.log(`📚 Articles already seeded (${count}).`);
-        return;
-    }
+    if (count > 0) { console.log(`📚 Articles already seeded (${count}).`); return; }
     const seedData = [
-        { title: "The Legend of Mount Kenya", slug: "legend-of-mount-kenya", category: "Mythology", image: "story-1.jpg", excerpt: "Discover the sacred mythology behind Kĩrĩnyaga, the mountain that served as the throne of Ngai.", content: "Mount Kenya, known to the Agĩkũyũ as Kĩrĩnyaga, is more than a mountain. It is the throne of Ngai (God), the highest point in the land, and the spiritual compass of the Gĩkũyũ people.\n\nAccording to oral tradition, Ngai dwells on the peaks of Kĩrĩnyaga, where the clouds touch the earth. When the first Gĩkũyũ man looked upon the mountain, he knew it was the place where the creator lived.\n\nThe name Kĩrĩnyaga means 'the mountain of whiteness' — a reference to the snow-capped peaks that gleam in the sun. For generations, this sight has reminded the Agĩkũyũ that the divine is always present, watching over them." },
-        { title: "Wanjiru's Sacrifice", slug: "wanjiru-sacrifice", category: "Folklore", image: "story-2.jpg", excerpt: "The haunting and powerful tale of Wanjiru, whose ultimate sacrifice saved her people from drought.", content: "Wanjiru's story is one of the most powerful and painful tales in Gĩkũyũ oral tradition. It speaks of sacrifice, community, and the sacred bond between the living and the ancestors.\n\nA great drought had fallen upon the land. The elders gathered and prayed, and they were told that the only way to end the drought was for a daughter of the community to be offered as a sacrifice.\n\nWanjiru was chosen. But she was not taken by force — she was asked to give her life willingly. And she did.\n\nAs she was led to the sacred place, the people sang and wept. She was given to the earth, and her blood soaked into the soil. Then, from the sky, the rains came." },
-        { title: "The Origin of the Nine Clans", slug: "origin-nine-clans", category: "History", image: "story-3.jpg", excerpt: "How Gĩkũyũ and Mũmbi's daughters married the mysterious strangers from the forest.", content: "The Agĩkũyũ nation traces its roots to a single ancestral couple — Gĩkũyũ and his wife Mũmbi.\n\nOne day, young men began to appear at the homestead. They came from the forest, drawn by something they could not explain. Each one sought the hand of one of Gĩkũyũ's daughters.\n\nBut Gĩkũyũ was wise. He tested the men — their courage, honesty, and ability to provide. Only those who passed were allowed to marry into the family.\n\nIn time, nine of these unions were blessed. And from these came the nine clans of the Agĩkũyũ." },
-        { title: "Mugumo: The Sacred Fig Tree", slug: "mugumo-sacred-fig-tree", category: "Culture", image: "story-4.jpg", excerpt: "Why the Mugumo tree was revered as a place of prayer, oath-taking, and community gathering.", content: "The Mugumo tree is more than a tree. To the Agĩkũyũ, it is a sacred space — a temple without walls, a witness to history.\n\nWhen someone took a solemn oath, they did so beneath the Mugumo. The tree was considered the dwelling place of ancestral spirits.\n\nWhen elders gathered to make decisions, they sat under the Mugumo. When a great leader died, they were buried under the Mugumo.\n\nEven today, the Mugumo remains significant. Many elders still refuse to cut one down. And in rural areas, you will find ancient Mugumo trees that have stood for centuries." },
-        { title: "The Clever Hare and the Hyena", slug: "clever-hare-and-hyena", category: "Folklore", image: "story-5.jpg", excerpt: "A classic Kikuyu folktale teaching wisdom, patience, and the consequences of greed.", content: "In Gĩkũyũ folklore, Kamũingĩ the hare is the trickster — small, quick-witted, and always one step ahead. The hyena is his opposite: big, strong, greedy, and easily fooled.\n\nOne day, the hare invited the hyena to a feast. But there was a condition — only the clever could attend.\n\nThe hyena, desperate for food, agreed. The hare led him on a long journey, full of riddles and tests. Each time, the hyena failed.\n\nFinally, exhausted, the hyena returned home with nothing. He had learned a lesson: that strength without wisdom is useless." },
-        { title: "The First Fire", slug: "first-fire", category: "Mythology", image: "story-6.jpg", excerpt: "The mythological story of how fire was brought to the Agĩkũyũ people.", content: "Before the Agĩkũyũ had fire, they lived in darkness. They ate their food raw, they were cold at night, and they feared the shadows.\n\nOne day, a young man decided to seek fire. He traveled far, past the lands he knew, into lands that no one had ever seen. And there, in a hidden valley, he found a spark — falling from the sky during a great storm.\n\nHe gathered the spark carefully and wrapped it in dry leaves. He carried it home, protecting it from wind and rain. And when he arrived, he shared it with his people.\n\nAnd so the elders declared: fire is a gift from the ancestors. It must never be wasted." }
+        { title: "The Legend of Mount Kenya", slug: "legend-of-mount-kenya", category: "Mythology", image: "story-1.jpg", excerpt: "Discover the sacred mythology behind Kĩrĩnyaga, the mountain that served as the throne of Ngai.", content: "Mount Kenya, known to the Agĩkũyũ as Kĩrĩnyaga, is more than a mountain. It is the throne of Ngai (God), the highest point in the land, and the spiritual compass of the Gĩkũyũ people.\n\nAccording to oral tradition, Ngai dwells on the peaks of Kĩrĩnyaga, where the clouds touch the earth. When the first Gĩkũyũ man looked upon the mountain, he knew it was the place where the creator lived.\n\nThe name Kĩrĩnyaga means 'the mountain of whiteness' — a reference to the snow-capped peaks that gleam in the sun." },
+        { title: "Wanjiru's Sacrifice", slug: "wanjiru-sacrifice", category: "Folklore", image: "story-2.jpg", excerpt: "The haunting and powerful tale of Wanjiru, whose ultimate sacrifice saved her people from drought.", content: "Wanjiru's story is one of the most powerful and painful tales in Gĩkũyũ oral tradition. It speaks of sacrifice, community, and the sacred bond between the living and the ancestors.\n\nA great drought had fallen upon the land. The elders gathered and prayed, and they were told that the only way to end the drought was for a daughter of the community to be offered as a sacrifice.\n\nWanjiru was chosen. But she was not taken by force — she was asked to give her life willingly. And she did." },
+        { title: "The Origin of the Nine Clans", slug: "origin-nine-clans", category: "History", image: "story-3.jpg", excerpt: "How Gĩkũyũ and Mũmbi's daughters married the mysterious strangers from the forest.", content: "The Agĩkũyũ nation traces its roots to a single ancestral couple — Gĩkũyũ and his wife Mũmbi.\n\nOne day, young men began to appear at the homestead. They came from the forest, drawn by something they could not explain.\n\nBut Gĩkũyũ was wise. He tested the men — their courage, honesty, and ability to provide. Only those who passed were allowed to marry into the family.\n\nIn time, nine of these unions were blessed. And from these came the nine clans of the Agĩkũyũ." },
+        { title: "Mugumo: The Sacred Fig Tree", slug: "mugumo-sacred-fig-tree", category: "Culture", image: "story-4.jpg", excerpt: "Why the Mugumo tree was revered as a place of prayer, oath-taking, and community gathering.", content: "The Mugumo tree is more than a tree. To the Agĩkũyũ, it is a sacred space — a temple without walls, a witness to history.\n\nWhen someone took a solemn oath, they did so beneath the Mugumo. The tree was considered the dwelling place of ancestral spirits.\n\nEven today, the Mugumo remains significant. Many elders still refuse to cut one down." },
+        { title: "The Clever Hare and the Hyena", slug: "clever-hare-and-hyena", category: "Folklore", image: "story-5.jpg", excerpt: "A classic Kikuyu folktale teaching wisdom, patience, and the consequences of greed.", content: "In Gĩkũyũ folklore, Kamũingĩ the hare is the trickster — small, quick-witted, and always one step ahead. The hyena is his opposite: big, strong, greedy, and easily fooled.\n\nOne day, the hare invited the hyena to a feast. But there was a condition — only the clever could attend.\n\nFinally, exhausted, the hyena returned home with nothing. He had learned a lesson: that strength without wisdom is useless." },
+        { title: "The First Fire", slug: "first-fire", category: "Mythology", image: "story-6.jpg", excerpt: "The mythological story of how fire was brought to the Agĩkũyũ people.", content: "Before the Agĩkũyũ had fire, they lived in darkness.\n\nOne day, a young man decided to seek fire. He traveled far, past the lands he knew. And there, in a hidden valley, he found a spark.\n\nHe carried it home carefully. And when he arrived, he shared it with his people. And so the elders declared: fire is a gift from the ancestors. It must never be wasted." }
     ];
-    try {
-        await Article.insertMany(seedData);
-        console.log(`📚 Seeded ${seedData.length} articles.`);
-    } catch (err) { console.error("Seed error:", err); }
+    try { await Article.insertMany(seedData); console.log(`📚 Seeded ${seedData.length} articles.`); }
+    catch (err) { console.error("Seed error:", err); }
 }
 
 // ================= AUTH MIDDLEWARE =================
@@ -110,31 +106,22 @@ function isAdmin(req, res, next) {
 }
 
 // ================= PUBLIC ROUTES =================
+app.get("/", (req, res) => res.json({ status: "Gĩkũyũ Archive backend is running 🔥" }));
 
-app.get("/", (req, res) => {
-    res.json({ status: "Gĩkũyũ Archive backend is running 🔥" });
-});
-
-// --- CONTACT ---
 app.post("/api/contact", async (req, res) => {
     try {
         const { name, email, subject, message } = req.body;
-        if (!name || !email || !subject || !message) {
-            return res.status(400).json({ success: false, message: "All fields required." });
-        }
-        const newMessage = new Message({ name, email, subject, message });
-        await newMessage.save();
-        console.log("📩 New contact from:", name);
+        if (!name || !email || !subject || !message) return res.status(400).json({ success: false, message: "All fields required." });
+        await new Message({ name, email, subject, message }).save();
         res.json({ success: true, message: "Message received. Asante!" });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
-// --- AUTH ---
 app.post("/api/auth/signup", async (req, res) => {
     try {
         const { name, email, password } = req.body;
         if (!name || !email || !password) return res.status(400).json({ success: false, message: "All fields required." });
-        if (password.length < 6) return res.status(400).json({ success: false, message: "Password must be 6+ characters." });
+        if (password.length < 6) return res.status(400).json({ success: false, message: "Password too short." });
         const existing = await User.findOne({ email: email.toLowerCase() });
         if (existing) return res.status(400).json({ success: false, message: "Email already registered." });
         const hashed = await bcrypt.hash(password, 10);
@@ -142,7 +129,7 @@ app.post("/api/auth/signup", async (req, res) => {
         await newUser.save();
         const token = jwt.sign({ id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role }, JWT_SECRET, { expiresIn: "7d" });
         res.json({ success: true, message: "Account created. Karibu!", token, user: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role } });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
 app.post("/api/auth/login", async (req, res) => {
@@ -150,40 +137,41 @@ app.post("/api/auth/login", async (req, res) => {
         const { email, password } = req.body;
         if (!email || !password) return res.status(400).json({ success: false, message: "Email and password required." });
         const user = await User.findOne({ email: email.toLowerCase() });
-        if (!user) return res.status(400).json({ success: false, message: "Invalid email or password." });
+        if (!user) return res.status(400).json({ success: false, message: "Invalid credentials." });
         const match = await bcrypt.compare(password, user.password);
-        if (!match) return res.status(400).json({ success: false, message: "Invalid email or password." });
+        if (!match) return res.status(400).json({ success: false, message: "Invalid credentials." });
         const token = jwt.sign({ id: user._id, name: user.name, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
         res.json({ success: true, message: "Karibu tena!", token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
 app.get("/api/auth/me", authenticateToken, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select("-password");
-        if (!user) return res.status(404).json({ success: false, message: "User not found." });
+        if (!user) return res.status(404).json({ success: false, message: "Not found." });
         res.json({ success: true, user });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
-// --- ARTICLES (public read) ---
 app.get("/api/articles", async (req, res) => {
     try {
         const articles = await Article.find().sort({ date: -1 });
         const withCounts = await Promise.all(articles.map(async (a) => {
-            const likeCount = await Like.countDocuments({ articleId: a._id });
+            const realLikes = await Like.countDocuments({ articleId: a._id });
+            const likeCount = (a.baseLikes || 0) + realLikes;
             const commentCount = await Comment.countDocuments({ articleId: a._id });
-            return { _id: a._id, title: a.title, slug: a.slug, category: a.category, image: a.image, excerpt: a.excerpt, author: a.author, date: a.date, likeCount, commentCount };
+            return { _id: a._id, title: a.title, slug: a.slug, category: a.category, image: a.image, excerpt: a.excerpt, author: a.author, date: a.date, baseLikes: a.baseLikes || 0, likeCount, commentCount };
         }));
         res.json({ success: true, articles: withCounts });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
 app.get("/api/articles/:slug", async (req, res) => {
     try {
         const article = await Article.findOne({ slug: req.params.slug });
         if (!article) return res.status(404).json({ success: false, message: "Not found." });
-        const likeCount = await Like.countDocuments({ articleId: article._id });
+        const realLikes = await Like.countDocuments({ articleId: article._id });
+        const likeCount = (article.baseLikes || 0) + realLikes;
         const commentCount = await Comment.countDocuments({ articleId: article._id });
         let userHasLiked = false;
         const authHeader = req.headers["authorization"];
@@ -196,7 +184,7 @@ app.get("/api/articles/:slug", async (req, res) => {
             } catch (e) {}
         }
         res.json({ success: true, article: { ...article.toObject(), likeCount, commentCount, userHasLiked } });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
 app.post("/api/articles/:slug/like", authenticateToken, async (req, res) => {
@@ -207,9 +195,10 @@ app.post("/api/articles/:slug/like", authenticateToken, async (req, res) => {
         let liked;
         if (existing) { await Like.deleteOne({ _id: existing._id }); liked = false; }
         else { await Like.create({ userId: req.user.id, articleId: article._id }); liked = true; }
-        const likeCount = await Like.countDocuments({ articleId: article._id });
+        const realLikes = await Like.countDocuments({ articleId: article._id });
+        const likeCount = (article.baseLikes || 0) + realLikes;
         res.json({ success: true, liked, likeCount });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
 app.get("/api/articles/:slug/comments", async (req, res) => {
@@ -218,69 +207,54 @@ app.get("/api/articles/:slug/comments", async (req, res) => {
         if (!article) return res.status(404).json({ success: false, message: "Not found." });
         const comments = await Comment.find({ articleId: article._id }).sort({ date: -1 });
         res.json({ success: true, comments });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
 app.post("/api/articles/:slug/comments", authenticateToken, async (req, res) => {
     try {
         const { text } = req.body;
-        if (!text || text.trim().length === 0) return res.status(400).json({ success: false, message: "Comment cannot be empty." });
+        if (!text || text.trim().length === 0) return res.status(400).json({ success: false, message: "Comment empty." });
         const article = await Article.findOne({ slug: req.params.slug });
         if (!article) return res.status(404).json({ success: false, message: "Not found." });
         const comment = await Comment.create({ userId: req.user.id, userName: req.user.name, articleId: article._id, text: text.trim() });
         res.json({ success: true, message: "Comment posted.", comment });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
 // ================= ADMIN ROUTES =================
-
-// Dashboard stats
 app.get("/api/admin/stats", authenticateToken, isAdmin, async (req, res) => {
     try {
         const [messageCount, userCount, articleCount, commentCount, likeCount] = await Promise.all([
-            Message.countDocuments(),
-            User.countDocuments(),
-            Article.countDocuments(),
-            Comment.countDocuments(),
-            Like.countDocuments()
+            Message.countDocuments(), User.countDocuments(), Article.countDocuments(),
+            Comment.countDocuments(), Like.countDocuments()
         ]);
         res.json({ success: true, stats: { messageCount, userCount, articleCount, commentCount, likeCount } });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
-// Contact messages
 app.get("/api/admin/messages", authenticateToken, isAdmin, async (req, res) => {
-    try {
-        const messages = await Message.find().sort({ date: -1 });
-        res.json({ success: true, messages });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    try { const messages = await Message.find().sort({ date: -1 }); res.json({ success: true, messages }); }
+    catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
 app.delete("/api/admin/messages/:id", authenticateToken, isAdmin, async (req, res) => {
-    try {
-        await Message.findByIdAndDelete(req.params.id);
-        res.json({ success: true, message: "Message deleted." });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    try { await Message.findByIdAndDelete(req.params.id); res.json({ success: true, message: "Deleted." }); }
+    catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
-// Users
 app.get("/api/admin/users", authenticateToken, isAdmin, async (req, res) => {
-    try {
-        const users = await User.find().select("-password").sort({ date: -1 });
-        res.json({ success: true, users });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    try { const users = await User.find().select("-password").sort({ date: -1 }); res.json({ success: true, users }); }
+    catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
 app.put("/api/admin/users/:id/role", authenticateToken, isAdmin, async (req, res) => {
     try {
         const { role } = req.body;
-        if (!["user", "contributor", "admin"].includes(role)) {
-            return res.status(400).json({ success: false, message: "Invalid role." });
-        }
+        if (!["user", "contributor", "admin"].includes(role)) return res.status(400).json({ success: false, message: "Invalid role." });
         const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select("-password");
-        if (!user) return res.status(404).json({ success: false, message: "User not found." });
+        if (!user) return res.status(404).json({ success: false, message: "Not found." });
         res.json({ success: true, message: "Role updated.", user });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
 app.delete("/api/admin/users/:id", authenticateToken, isAdmin, async (req, res) => {
@@ -289,49 +263,47 @@ app.delete("/api/admin/users/:id", authenticateToken, isAdmin, async (req, res) 
         await Comment.deleteMany({ userId: req.params.id });
         await Like.deleteMany({ userId: req.params.id });
         res.json({ success: true, message: "User deleted." });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
-// Comments
 app.get("/api/admin/comments", authenticateToken, isAdmin, async (req, res) => {
     try {
         const comments = await Comment.find().populate("articleId", "title slug").sort({ date: -1 });
         res.json({ success: true, comments });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
 app.delete("/api/admin/comments/:id", authenticateToken, isAdmin, async (req, res) => {
-    try {
-        await Comment.findByIdAndDelete(req.params.id);
-        res.json({ success: true, message: "Comment deleted." });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    try { await Comment.findByIdAndDelete(req.params.id); res.json({ success: true, message: "Deleted." }); }
+    catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
-// Articles CRUD
 app.post("/api/admin/articles", authenticateToken, isAdmin, async (req, res) => {
     try {
-        const { title, slug, category, image, excerpt, content, author } = req.body;
-        if (!title || !slug || !excerpt || !content) {
-            return res.status(400).json({ success: false, message: "Title, slug, excerpt, content are required." });
-        }
+        const { title, slug, category, image, excerpt, content, author, baseLikes } = req.body;
+        if (!title || !slug || !excerpt || !content) return res.status(400).json({ success: false, message: "Missing fields." });
         const existing = await Article.findOne({ slug });
-        if (existing) return res.status(400).json({ success: false, message: "Slug already exists." });
+        if (existing) return res.status(400).json({ success: false, message: "Slug exists." });
         const article = await Article.create({
-            title, slug, category: category || "Folklore",
+            title, slug,
+            category: category || "Folklore",
             image: image || "story-1.jpg",
             excerpt, content,
-            author: author || "Gĩkũyũ Archive"
+            author: author || "Gĩkũyũ Archive",
+            baseLikes: Number(baseLikes) || 0
         });
         res.json({ success: true, message: "Article created.", article });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
 app.put("/api/admin/articles/:id", authenticateToken, isAdmin, async (req, res) => {
     try {
-        const article = await Article.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!article) return res.status(404).json({ success: false, message: "Article not found." });
+        const update = { ...req.body };
+        if (update.baseLikes !== undefined) update.baseLikes = Number(update.baseLikes) || 0;
+        const article = await Article.findByIdAndUpdate(req.params.id, update, { new: true });
+        if (!article) return res.status(404).json({ success: false, message: "Not found." });
         res.json({ success: true, message: "Article updated.", article });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
 app.delete("/api/admin/articles/:id", authenticateToken, isAdmin, async (req, res) => {
@@ -340,10 +312,19 @@ app.delete("/api/admin/articles/:id", authenticateToken, isAdmin, async (req, re
         await Comment.deleteMany({ articleId: req.params.id });
         await Like.deleteMany({ articleId: req.params.id });
         res.json({ success: true, message: "Article deleted." });
-    } catch (error) { res.status(500).json({ success: false, message: "Server error." }); }
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
-// ================= START =================
-app.listen(PORT, () => {
-    console.log(`🚀 Gĩkũyũ Archive backend running on port ${PORT}`);
+app.put("/api/admin/articles/:id/likes", authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const { baseLikes } = req.body;
+        const num = Number(baseLikes);
+        if (isNaN(num) || num < 0) return res.status(400).json({ success: false, message: "Invalid number." });
+        const article = await Article.findByIdAndUpdate(req.params.id, { baseLikes: num }, { new: true });
+        if (!article) return res.status(404).json({ success: false, message: "Not found." });
+        const realLikes = await Like.countDocuments({ articleId: article._id });
+        res.json({ success: true, message: "Likes adjusted.", baseLikes: num, totalLikes: num + realLikes });
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
+
+app.listen(PORT, () => { console.log(`🚀 Gĩkũyũ Archive backend running on port ${PORT}`); });
