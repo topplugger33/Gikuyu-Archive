@@ -338,7 +338,7 @@ app.post("/api/forum/posts/:id/comments", authenticateToken, async (req, res) =>
     } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
-// ADMIN
+// ================= ADMIN =================
 app.get("/api/admin/stats", authenticateToken, isAdmin, async (req, res) => {
     try {
         const [messageCount, userCount, articleCount, commentCount, likeCount, pendingCount, postCount] = await Promise.all([
