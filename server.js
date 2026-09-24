@@ -33,17 +33,13 @@ const upload = multer({
     }
 });
 
-mongoose
-    .connect(MONGO_URI)
+mongoose.connect(MONGO_URI)
     .then(() => { console.log("✅ Connected to MongoDB"); seedArticles(); })
     .catch((err) => console.error("❌ MongoDB error:", err));
 
 // ================= MODELS =================
 const MessageSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true },
-    subject: { type: String, required: true },
-    message: { type: String, required: true },
+    name: String, email: String, subject: String, message: String,
     date: { type: Date, default: Date.now }
 });
 
@@ -64,6 +60,9 @@ const ArticleSchema = new mongoose.Schema({
     content: { type: String, required: true },
     author: { type: String, default: "Gĩkũyũ Archive" },
     baseLikes: { type: Number, default: 0 },
+    status: { type: String, enum: ["pending", "published", "rejected"], default: "published" },
+    submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    submitterName: String,
     date: { type: Date, default: Date.now }
 });
 
@@ -75,9 +74,9 @@ const LikeSchema = new mongoose.Schema({
 
 const CommentSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    userName: { type: String, required: true },
+    userName: String,
     articleId: { type: mongoose.Schema.Types.ObjectId, ref: "Article", required: true },
-    text: { type: String, required: true },
+    text: String,
     date: { type: Date, default: Date.now }
 });
 
@@ -90,17 +89,17 @@ const Comment = mongoose.model("Comment", CommentSchema);
 // ================= SEED =================
 async function seedArticles() {
     const count = await Article.countDocuments();
-    if (count > 0) { console.log(`📚 Articles already seeded (${count}).`); return; }
+    if (count > 0) { console.log(`📚 Articles already seeded.`); return; }
     const seedData = [
-        { title: "The Legend of Mount Kenya", slug: "legend-of-mount-kenya", category: "Mythology", image: "story-1.jpg", excerpt: "Discover the sacred mythology behind Kĩrĩnyaga, the mountain that served as the throne of Ngai.", content: "Mount Kenya, known to the Agĩkũyũ as Kĩrĩnyaga, is more than a mountain. It is the throne of Ngai (God), the highest point in the land, and the spiritual compass of the Gĩkũyũ people.\n\nAccording to oral tradition, Ngai dwells on the peaks of Kĩrĩnyaga, where the clouds touch the earth.\n\nThe name Kĩrĩnyaga means 'the mountain of whiteness' — a reference to the snow-capped peaks that gleam in the sun." },
-        { title: "Wanjiru's Sacrifice", slug: "wanjiru-sacrifice", category: "Folklore", image: "story-2.jpg", excerpt: "The haunting and powerful tale of Wanjiru, whose ultimate sacrifice saved her people from drought.", content: "Wanjiru's story is one of the most powerful and painful tales in Gĩkũyũ oral tradition.\n\nA great drought had fallen upon the land. The elders gathered and prayed, and they were told that the only way to end the drought was for a daughter of the community to be offered as a sacrifice.\n\nWanjiru was chosen. But she was not taken by force — she was asked to give her life willingly. And she did." },
-        { title: "The Origin of the Nine Clans", slug: "origin-nine-clans", category: "History", image: "story-3.jpg", excerpt: "How Gĩkũyũ and Mũmbi's daughters married the mysterious strangers from the forest.", content: "The Agĩkũyũ nation traces its roots to a single ancestral couple — Gĩkũyũ and his wife Mũmbi.\n\nOne day, young men began to appear at the homestead.\n\nBut Gĩkũyũ was wise. He tested the men — their courage, honesty, and ability to provide. Only those who passed were allowed to marry into the family.\n\nIn time, nine of these unions were blessed." },
-        { title: "Mugumo: The Sacred Fig Tree", slug: "mugumo-sacred-fig-tree", category: "Culture", image: "story-4.jpg", excerpt: "Why the Mugumo tree was revered as a place of prayer, oath-taking, and community gathering.", content: "The Mugumo tree is more than a tree. To the Agĩkũyũ, it is a sacred space — a temple without walls.\n\nWhen someone took a solemn oath, they did so beneath the Mugumo.\n\nEven today, the Mugumo remains significant." },
-        { title: "The Clever Hare and the Hyena", slug: "clever-hare-and-hyena", category: "Folklore", image: "story-5.jpg", excerpt: "A classic Kikuyu folktale teaching wisdom, patience, and the consequences of greed.", content: "In Gĩkũyũ folklore, Kamũingĩ the hare is the trickster — small, quick-witted, and always one step ahead.\n\nOne day, the hare invited the hyena to a feast. But there was a condition — only the clever could attend.\n\nFinally, exhausted, the hyena returned home with nothing." },
-        { title: "The First Fire", slug: "first-fire", category: "Mythology", image: "story-6.jpg", excerpt: "The mythological story of how fire was brought to the Agĩkũyũ people.", content: "Before the Agĩkũyũ had fire, they lived in darkness.\n\nOne day, a young man decided to seek fire. He traveled far, past the lands he knew. And there, in a hidden valley, he found a spark.\n\nHe carried it home carefully. And when he arrived, he shared it with his people." }
+        { title: "The Legend of Mount Kenya", slug: "legend-of-mount-kenya", category: "Mythology", image: "story-1.jpg", excerpt: "Discover the sacred mythology behind Kĩrĩnyaga.", content: "Mount Kenya, known to the Agĩkũyũ as Kĩrĩnyaga, is more than a mountain.\n\nAccording to oral tradition, Ngai dwells on the peaks of Kĩrĩnyaga.\n\nThe name Kĩrĩnyaga means 'the mountain of whiteness'." },
+        { title: "Wanjiru's Sacrifice", slug: "wanjiru-sacrifice", category: "Folklore", image: "story-2.jpg", excerpt: "The haunting tale of Wanjiru's sacrifice.", content: "Wanjiru's story is one of the most powerful tales in Gĩkũyũ oral tradition.\n\nA great drought had fallen upon the land. The elders were told that a daughter of the community must be offered.\n\nWanjiru gave her life willingly." },
+        { title: "The Origin of the Nine Clans", slug: "origin-nine-clans", category: "History", image: "story-3.jpg", excerpt: "How the nine clans were born.", content: "The Agĩkũyũ nation traces its roots to Gĩkũyũ and Mũmbi.\n\nYoung men from the forest married their daughters, and nine unions were blessed." },
+        { title: "Mugumo: The Sacred Fig Tree", slug: "mugumo-sacred-fig-tree", category: "Culture", image: "story-4.jpg", excerpt: "The sacred Mugumo tree.", content: "The Mugumo tree is a sacred space — a temple without walls.\n\nOaths were taken beneath it." },
+        { title: "The Clever Hare and the Hyena", slug: "clever-hare-and-hyena", category: "Folklore", image: "story-5.jpg", excerpt: "A classic folktale about wisdom.", content: "Kamũingĩ the hare is the trickster.\n\nThe hyena learned that strength without wisdom is useless." },
+        { title: "The First Fire", slug: "first-fire", category: "Mythology", image: "story-6.jpg", excerpt: "How fire came to the Agĩkũyũ.", content: "Before the Agĩkũyũ had fire, they lived in darkness.\n\nA young man found a spark and brought it home." }
     ];
     try { await Article.insertMany(seedData); console.log(`📚 Seeded ${seedData.length} articles.`); }
-    catch (err) { console.error("Seed error:", err); }
+    catch (err) { console.error(err); }
 }
 
 // ================= AUTH =================
@@ -122,7 +121,7 @@ function isAdmin(req, res, next) {
     next();
 }
 
-// ================= PUBLIC ROUTES =================
+// ================= PUBLIC =================
 app.get("/", (req, res) => res.json({ status: "Gĩkũyũ Archive backend is running 🔥" }));
 
 app.post("/api/contact", async (req, res) => {
@@ -170,9 +169,10 @@ app.get("/api/auth/me", authenticateToken, async (req, res) => {
     } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
+// Articles (only published show publicly)
 app.get("/api/articles", async (req, res) => {
     try {
-        const articles = await Article.find().sort({ date: -1 });
+        const articles = await Article.find({ status: "published" }).sort({ date: -1 });
         const withCounts = await Promise.all(articles.map(async (a) => {
             const realLikes = await Like.countDocuments({ articleId: a._id });
             const likeCount = (a.baseLikes || 0) + realLikes;
@@ -187,6 +187,16 @@ app.get("/api/articles/:slug", async (req, res) => {
     try {
         const article = await Article.findOne({ slug: req.params.slug });
         if (!article) return res.status(404).json({ success: false, message: "Not found." });
+        if (article.status === "pending") {
+            // Only admin can view pending
+            const authHeader = req.headers["authorization"];
+            const token = authHeader && authHeader.split(" ")[1];
+            if (!token) return res.status(404).json({ success: false, message: "Not found." });
+            try {
+                const decoded = jwt.verify(token, JWT_SECRET);
+                if (decoded.role !== "admin") return res.status(404).json({ success: false, message: "Not found." });
+            } catch (e) { return res.status(404).json({ success: false, message: "Not found." }); }
+        }
         const realLikes = await Like.countDocuments({ articleId: article._id });
         const likeCount = (article.baseLikes || 0) + realLikes;
         const commentCount = await Comment.countDocuments({ articleId: article._id });
@@ -238,17 +248,103 @@ app.post("/api/articles/:slug/comments", authenticateToken, async (req, res) => 
     } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
-// ================= ADMIN ROUTES =================
-app.get("/api/admin/stats", authenticateToken, isAdmin, async (req, res) => {
+// ================= USER SUBMISSION =================
+app.post("/api/submissions", authenticateToken, upload.single("file"), async (req, res) => {
     try {
-        const [messageCount, userCount, articleCount, commentCount, likeCount] = await Promise.all([
-            Message.countDocuments(), User.countDocuments(), Article.countDocuments(),
-            Comment.countDocuments(), Like.countDocuments()
-        ]);
-        res.json({ success: true, stats: { messageCount, userCount, articleCount, commentCount, likeCount } });
+        const { title, category, excerpt, content, image } = req.body;
+        if (!title || !excerpt || !content) {
+            return res.status(400).json({ success: false, message: "Title, excerpt, and content are required." });
+        }
+
+        let imageUrl = image || "story-1.jpg";
+
+        // If a file was uploaded, send to Cloudinary
+        if (req.file && process.env.CLOUDINARY_CLOUD_NAME) {
+            const b64 = Buffer.from(req.file.buffer).toString("base64");
+            const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+            const result = await cloudinary.uploader.upload(dataURI, {
+                folder: "gikuyu-archive/submissions",
+                resource_type: "image"
+            });
+            imageUrl = result.secure_url;
+        }
+
+        // Auto-generate unique slug
+        let baseSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        let slug = baseSlug;
+        let counter = 1;
+        while (await Article.findOne({ slug })) {
+            slug = baseSlug + "-" + counter;
+            counter++;
+        }
+
+        const article = await Article.create({
+            title,
+            slug,
+            category: category || "Community",
+            image: imageUrl,
+            excerpt,
+            content,
+            author: req.user.name,
+            status: "pending",
+            submittedBy: req.user.id,
+            submitterName: req.user.name
+        });
+
+        console.log("📝 New submission from:", req.user.name);
+        res.json({ success: true, message: "Story submitted! An admin will review it soon.", article });
+    } catch (e) {
+        console.error("Submission error:", e);
+        res.status(500).json({ success: false, message: "Server error: " + e.message });
+    }
+});
+
+// User's own submissions
+app.get("/api/submissions/mine", authenticateToken, async (req, res) => {
+    try {
+        const subs = await Article.find({ submittedBy: req.user.id }).sort({ date: -1 });
+        res.json({ success: true, submissions: subs });
     } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
+// ================= ADMIN =================
+app.get("/api/admin/stats", authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const [messageCount, userCount, articleCount, commentCount, likeCount, pendingCount] = await Promise.all([
+            Message.countDocuments(), User.countDocuments(),
+            Article.countDocuments({ status: "published" }),
+            Comment.countDocuments(), Like.countDocuments(),
+            Article.countDocuments({ status: "pending" })
+        ]);
+        res.json({ success: true, stats: { messageCount, userCount, articleCount, commentCount, likeCount, pendingCount } });
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
+});
+
+// Submissions management
+app.get("/api/admin/submissions", authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const subs = await Article.find({ status: "pending" }).sort({ date: -1 });
+        res.json({ success: true, submissions: subs });
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
+});
+
+app.put("/api/admin/submissions/:id/approve", authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const article = await Article.findByIdAndUpdate(req.params.id, { status: "published" }, { new: true });
+        if (!article) return res.status(404).json({ success: false, message: "Not found." });
+        res.json({ success: true, message: "Published!", article });
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
+});
+
+app.put("/api/admin/submissions/:id/reject", authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const article = await Article.findByIdAndUpdate(req.params.id, { status: "rejected" }, { new: true });
+        if (!article) return res.status(404).json({ success: false, message: "Not found." });
+        res.json({ success: true, message: "Rejected.", article });
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
+});
+
+// Messages
 app.get("/api/admin/messages", authenticateToken, isAdmin, async (req, res) => {
     try { const messages = await Message.find().sort({ date: -1 }); res.json({ success: true, messages }); }
     catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
@@ -259,6 +355,7 @@ app.delete("/api/admin/messages/:id", authenticateToken, isAdmin, async (req, re
     catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
+// Users
 app.get("/api/admin/users", authenticateToken, isAdmin, async (req, res) => {
     try { const users = await User.find().select("-password").sort({ date: -1 }); res.json({ success: true, users }); }
     catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
@@ -283,6 +380,7 @@ app.delete("/api/admin/users/:id", authenticateToken, isAdmin, async (req, res) 
     } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
+// Comments
 app.get("/api/admin/comments", authenticateToken, isAdmin, async (req, res) => {
     try {
         const comments = await Comment.find().populate("articleId", "title slug").sort({ date: -1 });
@@ -295,28 +393,21 @@ app.delete("/api/admin/comments/:id", authenticateToken, isAdmin, async (req, re
     catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
-// UPLOAD (Cloudinary)
+// Upload
 app.post("/api/admin/upload", authenticateToken, isAdmin, upload.single("file"), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded." });
-        if (!process.env.CLOUDINARY_CLOUD_NAME) {
-            return res.status(500).json({ success: false, message: "Cloudinary not configured on server." });
-        }
+        if (!process.env.CLOUDINARY_CLOUD_NAME) return res.status(500).json({ success: false, message: "Cloudinary not configured." });
         const b64 = Buffer.from(req.file.buffer).toString("base64");
         const dataURI = `data:${req.file.mimetype};base64,${b64}`;
-        const result = await cloudinary.uploader.upload(dataURI, {
-            folder: "gikuyu-archive",
-            resource_type: "image"
-        });
-        console.log("📤 Uploaded to Cloudinary:", result.secure_url);
+        const result = await cloudinary.uploader.upload(dataURI, { folder: "gikuyu-archive", resource_type: "image" });
         res.json({ success: true, url: result.secure_url });
     } catch (error) {
-        console.error("Upload error:", error);
-        res.status(500).json({ success: false, message: "Upload failed: " + (error.message || "unknown") });
+        res.status(500).json({ success: false, message: "Upload failed: " + error.message });
     }
 });
 
-// Articles CRUD
+// Articles CRUD (admin)
 app.post("/api/admin/articles", authenticateToken, isAdmin, async (req, res) => {
     try {
         const { title, slug, category, image, excerpt, content, author, baseLikes } = req.body;
@@ -329,7 +420,8 @@ app.post("/api/admin/articles", authenticateToken, isAdmin, async (req, res) => 
             image: image || "story-1.jpg",
             excerpt, content,
             author: author || "Gĩkũyũ Archive",
-            baseLikes: Number(baseLikes) || 0
+            baseLikes: Number(baseLikes) || 0,
+            status: "published"
         });
         res.json({ success: true, message: "Article created.", article });
     } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
@@ -351,6 +443,20 @@ app.delete("/api/admin/articles/:id", authenticateToken, isAdmin, async (req, re
         await Comment.deleteMany({ articleId: req.params.id });
         await Like.deleteMany({ articleId: req.params.id });
         res.json({ success: true, message: "Article deleted." });
+    } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
+});
+
+// Admin view all articles (including pending)
+app.get("/api/admin/articles", authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const articles = await Article.find().sort({ date: -1 });
+        const withCounts = await Promise.all(articles.map(async (a) => {
+            const realLikes = await Like.countDocuments({ articleId: a._id });
+            const likeCount = (a.baseLikes || 0) + realLikes;
+            const commentCount = await Comment.countDocuments({ articleId: a._id });
+            return { _id: a._id, title: a.title, slug: a.slug, category: a.category, image: a.image, excerpt: a.excerpt, author: a.author, date: a.date, baseLikes: a.baseLikes || 0, status: a.status, submitterName: a.submitterName, likeCount, commentCount };
+        }));
+        res.json({ success: true, articles: withCounts });
     } catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
