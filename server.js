@@ -3,18 +3,35 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
+const cloudinary = require("cloudinary").v2;
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 
 const MONGO_URI = process.env.MONGO_URI;
 const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!MONGO_URI) { console.error("❌ MONGO_URI not set!"); process.exit(1); }
 if (!JWT_SECRET) { console.error("❌ JWT_SECRET not set!"); process.exit(1); }
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith("image/")) cb(null, true);
+        else cb(new Error("Only image files allowed."));
+    }
+});
 
 mongoose
     .connect(MONGO_URI)
@@ -75,18 +92,18 @@ async function seedArticles() {
     const count = await Article.countDocuments();
     if (count > 0) { console.log(`📚 Articles already seeded (${count}).`); return; }
     const seedData = [
-        { title: "The Legend of Mount Kenya", slug: "legend-of-mount-kenya", category: "Mythology", image: "story-1.jpg", excerpt: "Discover the sacred mythology behind Kĩrĩnyaga, the mountain that served as the throne of Ngai.", content: "Mount Kenya, known to the Agĩkũyũ as Kĩrĩnyaga, is more than a mountain. It is the throne of Ngai (God), the highest point in the land, and the spiritual compass of the Gĩkũyũ people.\n\nAccording to oral tradition, Ngai dwells on the peaks of Kĩrĩnyaga, where the clouds touch the earth. When the first Gĩkũyũ man looked upon the mountain, he knew it was the place where the creator lived.\n\nThe name Kĩrĩnyaga means 'the mountain of whiteness' — a reference to the snow-capped peaks that gleam in the sun." },
-        { title: "Wanjiru's Sacrifice", slug: "wanjiru-sacrifice", category: "Folklore", image: "story-2.jpg", excerpt: "The haunting and powerful tale of Wanjiru, whose ultimate sacrifice saved her people from drought.", content: "Wanjiru's story is one of the most powerful and painful tales in Gĩkũyũ oral tradition. It speaks of sacrifice, community, and the sacred bond between the living and the ancestors.\n\nA great drought had fallen upon the land. The elders gathered and prayed, and they were told that the only way to end the drought was for a daughter of the community to be offered as a sacrifice.\n\nWanjiru was chosen. But she was not taken by force — she was asked to give her life willingly. And she did." },
-        { title: "The Origin of the Nine Clans", slug: "origin-nine-clans", category: "History", image: "story-3.jpg", excerpt: "How Gĩkũyũ and Mũmbi's daughters married the mysterious strangers from the forest.", content: "The Agĩkũyũ nation traces its roots to a single ancestral couple — Gĩkũyũ and his wife Mũmbi.\n\nOne day, young men began to appear at the homestead. They came from the forest, drawn by something they could not explain.\n\nBut Gĩkũyũ was wise. He tested the men — their courage, honesty, and ability to provide. Only those who passed were allowed to marry into the family.\n\nIn time, nine of these unions were blessed. And from these came the nine clans of the Agĩkũyũ." },
-        { title: "Mugumo: The Sacred Fig Tree", slug: "mugumo-sacred-fig-tree", category: "Culture", image: "story-4.jpg", excerpt: "Why the Mugumo tree was revered as a place of prayer, oath-taking, and community gathering.", content: "The Mugumo tree is more than a tree. To the Agĩkũyũ, it is a sacred space — a temple without walls, a witness to history.\n\nWhen someone took a solemn oath, they did so beneath the Mugumo. The tree was considered the dwelling place of ancestral spirits.\n\nEven today, the Mugumo remains significant. Many elders still refuse to cut one down." },
-        { title: "The Clever Hare and the Hyena", slug: "clever-hare-and-hyena", category: "Folklore", image: "story-5.jpg", excerpt: "A classic Kikuyu folktale teaching wisdom, patience, and the consequences of greed.", content: "In Gĩkũyũ folklore, Kamũingĩ the hare is the trickster — small, quick-witted, and always one step ahead. The hyena is his opposite: big, strong, greedy, and easily fooled.\n\nOne day, the hare invited the hyena to a feast. But there was a condition — only the clever could attend.\n\nFinally, exhausted, the hyena returned home with nothing. He had learned a lesson: that strength without wisdom is useless." },
-        { title: "The First Fire", slug: "first-fire", category: "Mythology", image: "story-6.jpg", excerpt: "The mythological story of how fire was brought to the Agĩkũyũ people.", content: "Before the Agĩkũyũ had fire, they lived in darkness.\n\nOne day, a young man decided to seek fire. He traveled far, past the lands he knew. And there, in a hidden valley, he found a spark.\n\nHe carried it home carefully. And when he arrived, he shared it with his people. And so the elders declared: fire is a gift from the ancestors. It must never be wasted." }
+        { title: "The Legend of Mount Kenya", slug: "legend-of-mount-kenya", category: "Mythology", image: "story-1.jpg", excerpt: "Discover the sacred mythology behind Kĩrĩnyaga, the mountain that served as the throne of Ngai.", content: "Mount Kenya, known to the Agĩkũyũ as Kĩrĩnyaga, is more than a mountain. It is the throne of Ngai (God), the highest point in the land, and the spiritual compass of the Gĩkũyũ people.\n\nAccording to oral tradition, Ngai dwells on the peaks of Kĩrĩnyaga, where the clouds touch the earth.\n\nThe name Kĩrĩnyaga means 'the mountain of whiteness' — a reference to the snow-capped peaks that gleam in the sun." },
+        { title: "Wanjiru's Sacrifice", slug: "wanjiru-sacrifice", category: "Folklore", image: "story-2.jpg", excerpt: "The haunting and powerful tale of Wanjiru, whose ultimate sacrifice saved her people from drought.", content: "Wanjiru's story is one of the most powerful and painful tales in Gĩkũyũ oral tradition.\n\nA great drought had fallen upon the land. The elders gathered and prayed, and they were told that the only way to end the drought was for a daughter of the community to be offered as a sacrifice.\n\nWanjiru was chosen. But she was not taken by force — she was asked to give her life willingly. And she did." },
+        { title: "The Origin of the Nine Clans", slug: "origin-nine-clans", category: "History", image: "story-3.jpg", excerpt: "How Gĩkũyũ and Mũmbi's daughters married the mysterious strangers from the forest.", content: "The Agĩkũyũ nation traces its roots to a single ancestral couple — Gĩkũyũ and his wife Mũmbi.\n\nOne day, young men began to appear at the homestead.\n\nBut Gĩkũyũ was wise. He tested the men — their courage, honesty, and ability to provide. Only those who passed were allowed to marry into the family.\n\nIn time, nine of these unions were blessed." },
+        { title: "Mugumo: The Sacred Fig Tree", slug: "mugumo-sacred-fig-tree", category: "Culture", image: "story-4.jpg", excerpt: "Why the Mugumo tree was revered as a place of prayer, oath-taking, and community gathering.", content: "The Mugumo tree is more than a tree. To the Agĩkũyũ, it is a sacred space — a temple without walls.\n\nWhen someone took a solemn oath, they did so beneath the Mugumo.\n\nEven today, the Mugumo remains significant." },
+        { title: "The Clever Hare and the Hyena", slug: "clever-hare-and-hyena", category: "Folklore", image: "story-5.jpg", excerpt: "A classic Kikuyu folktale teaching wisdom, patience, and the consequences of greed.", content: "In Gĩkũyũ folklore, Kamũingĩ the hare is the trickster — small, quick-witted, and always one step ahead.\n\nOne day, the hare invited the hyena to a feast. But there was a condition — only the clever could attend.\n\nFinally, exhausted, the hyena returned home with nothing." },
+        { title: "The First Fire", slug: "first-fire", category: "Mythology", image: "story-6.jpg", excerpt: "The mythological story of how fire was brought to the Agĩkũyũ people.", content: "Before the Agĩkũyũ had fire, they lived in darkness.\n\nOne day, a young man decided to seek fire. He traveled far, past the lands he knew. And there, in a hidden valley, he found a spark.\n\nHe carried it home carefully. And when he arrived, he shared it with his people." }
     ];
     try { await Article.insertMany(seedData); console.log(`📚 Seeded ${seedData.length} articles.`); }
     catch (err) { console.error("Seed error:", err); }
 }
 
-// ================= AUTH MIDDLEWARE =================
+// ================= AUTH =================
 function authenticateToken(req, res, next) {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
@@ -278,6 +295,28 @@ app.delete("/api/admin/comments/:id", authenticateToken, isAdmin, async (req, re
     catch (e) { res.status(500).json({ success: false, message: "Server error." }); }
 });
 
+// UPLOAD (Cloudinary)
+app.post("/api/admin/upload", authenticateToken, isAdmin, upload.single("file"), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded." });
+        if (!process.env.CLOUDINARY_CLOUD_NAME) {
+            return res.status(500).json({ success: false, message: "Cloudinary not configured on server." });
+        }
+        const b64 = Buffer.from(req.file.buffer).toString("base64");
+        const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+        const result = await cloudinary.uploader.upload(dataURI, {
+            folder: "gikuyu-archive",
+            resource_type: "image"
+        });
+        console.log("📤 Uploaded to Cloudinary:", result.secure_url);
+        res.json({ success: true, url: result.secure_url });
+    } catch (error) {
+        console.error("Upload error:", error);
+        res.status(500).json({ success: false, message: "Upload failed: " + (error.message || "unknown") });
+    }
+});
+
+// Articles CRUD
 app.post("/api/admin/articles", authenticateToken, isAdmin, async (req, res) => {
     try {
         const { title, slug, category, image, excerpt, content, author, baseLikes } = req.body;
